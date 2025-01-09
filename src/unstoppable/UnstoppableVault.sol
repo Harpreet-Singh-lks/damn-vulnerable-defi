@@ -17,10 +17,10 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     using SafeTransferLib for ERC20;
     using FixedPointMathLib for uint256;
 
-    uint256 public constant FEE_FACTOR = 0.05 ether;
-    uint64 public constant GRACE_PERIOD = 30 days;
+    uint256 public constant FEE_FACTOR = 0.05 ether;// const fee
+    uint64 public constant GRACE_PERIOD = 30 days;// time alloted for flashloan
 
-    uint64 public immutable end = uint64(block.timestamp) + GRACE_PERIOD;
+    uint64 public immutable end = uint64(block.timestamp) + GRACE_PERIOD;// end time for flashloan
 
     address public feeRecipient;
 
@@ -36,14 +36,14 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
         Owned(_owner)
     {
         feeRecipient = _feeRecipient;
-        emit FeeRecipientUpdated(_feeRecipient);
+        emit FeeRecipientUpdated(_feeRecipient);// emit is used to trigger an event 
     }
 
     /**
      * @inheritdoc IERC3156FlashLender
      */
     function maxFlashLoan(address _token) public view nonReadReentrant returns (uint256) {
-        if (address(asset) != _token) {
+        if (address(asset) != _token) {////---------------
             return 0;
         }
 
@@ -58,7 +58,7 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
             revert UnsupportedCurrency();
         }
 
-        if (block.timestamp < end && _amount < maxFlashLoan(_token)) {
+        if (block.timestamp < end && _amount < maxFlashLoan(_token)) {//--------------------------888888888888---------------
             return 0;
         } else {
             return _amount.mulWadUp(FEE_FACTOR);
@@ -69,7 +69,7 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
      * @inheritdoc ERC4626
      */
     function totalAssets() public view override nonReadReentrant returns (uint256) {
-        return asset.balanceOf(address(this));
+        return asset.balanceOf(address(this));//*************************** */
     }
 
     /**
@@ -82,6 +82,9 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
         if (amount == 0) revert InvalidAmount(0); // fail early
         if (address(asset) != _token) revert UnsupportedCurrency(); // enforce ERC3156 requirement
         uint256 balanceBefore = totalAssets();
+
+        ///----------*****************_________ we wnat to revert this condition 
+        // we can revert this condition by making converttoshare not equal to balancebefore
         if (convertToShares(totalSupply) != balanceBefore) revert InvalidBalance(); // enforce ERC4626 requirement
 
         // transfer tokens out + execute callback on receiver
